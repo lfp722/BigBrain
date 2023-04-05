@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import EditGame from './pages/EditGame';
 import EditQuestion from './pages/EditQuestion';
+import CreateQuestion from './pages/CreateQuestion';
 
 function App () {
   return (
@@ -14,6 +15,7 @@ function App () {
         <Route exact path="/register" element={ <Register />} />
         <Route exact path='/dashboard/:token' element={ <Dashboard />} />
         <Route exact path='/editGame/:token/:quizId' element={ <EditGame />} />
+        <Route exact path='/createQuestion/:token/:questionId' element={ <CreateQuestion />} />
         <Route exact path='/editQuestion/:token/:questionId/:quizId' element={ <EditQuestion />} />
       </Routes>
     </Router>

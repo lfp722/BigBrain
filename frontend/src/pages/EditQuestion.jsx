@@ -1,5 +1,4 @@
-/* eslint-disable no-unused-vars */
-import { json, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import fileToDataUrl from '../helper/helper'
 const url = 'http://localhost:5005';
@@ -98,12 +97,45 @@ function EditQuestion () {
 
   const handleAnswerChange = (index, field, value) => {
     const updatedAnswers = [...currentQuizAnswer];
-    updatedAnswers[index][field] = value;
+    updatedAnswers[index][field] = field === 'correct' ? value === 'true' : value;
+    setCurrentQuizAnswer(updatedAnswers);
+  };
+
+  const addAnswer = () => {
+    const newAnswer = { text: '', correct: false };
+    setCurrentQuizAnswer([...currentQuizAnswer, newAnswer]);
+  };
+
+  const deleteAnswer = (index) => {
+    const updatedAnswers = [...currentQuizAnswer];
+    updatedAnswers.splice(index, 1);
     setCurrentQuizAnswer(updatedAnswers);
   };
 
   const editQuiz = async (event) => {
     event.preventDefault();
+    let numOfAns = 0;
+    if (currentQuiz.answers.length > 6 || currentQuiz.answers.length < 2) {
+      alert('Number of options should be between 2 to 6!');
+      return;
+    }
+    currentQuizAnswer.forEach(a => {
+      if (a.correct === true) {
+        numOfAns += 1;
+      }
+    })
+    if (numOfAns === 0) {
+      alert('There is no answer to this question!');
+      return;
+    }
+    if (currentQuizType === 'single-choice' && numOfAns > 1) {
+      alert('Single Answer Question should not have more than one answer!');
+      return;
+    }
+    if (currentQuizType === 'multiple-choice' && numOfAns === 1) {
+      alert('Multiple answer question should not have more than one answer!');
+      return;
+    }
     let newMedia;
     if (dropdownOption === 'none') {
       newMedia = {
@@ -122,15 +154,6 @@ function EditQuestion () {
         type: dropdownOption,
         img: imageUrl
       }
-    }
-    const quiz = {
-      id: quizId,
-      type: currentQuizType,
-      question: currentQuizTitle,
-      timeLimit: currentQuizTimeLimit,
-      points: currentQuizPoint,
-      media: newMedia,
-      answers: currentQuizAnswer
     }
     const updatedQuestions = question.questions.map(q => {
       if (parseInt(q.id) === parseInt(quizId)) {
@@ -170,6 +193,7 @@ function EditQuestion () {
       alert(`Error: ${error}`);
       throw new Error(`Error: ${error}`);
     }
+    // TODO: href to the previous page
   }
 
   if (currentQuiz) {
@@ -225,7 +249,7 @@ function EditQuestion () {
           {renderDropdownField()}
         </div>
         {currentQuizAnswer.map((answer, index) => (
-          <div key={answer.text}>
+          <div key={index}>
             <label>Text: </label>
             <input
               type="text"
@@ -242,8 +266,10 @@ function EditQuestion () {
               <option value='true'>true</option>
               <option value='false'>false</option>
             </select>
+            <button onClick={() => deleteAnswer(index)}>Delete Answer</button>
           </div>
         ))}
+        <button onClick={addAnswer}>Add Answer</button>
         <br></br>
         <button type="submit" className="btn btn-primary">Edit Question!</button>
       </form>
