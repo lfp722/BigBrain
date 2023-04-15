@@ -1,8 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
-import 'bootstrap/dist/js/bootstrap.min.js';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import LogoutButton from '../components/Logout';
 import '../styles/DashboardStyle.css';
 const url = 'http://localhost:5005';
 
@@ -12,6 +11,7 @@ function Dashboard () {
   const [newQuizName, setQuizName] = useState('');
   const [showGameEnd, setShowGameEnd] = useState(false);
   const [showGameStart, setShowGameStart] = useState(false);
+  const [sessionId, setSessionId] = useState('');
 
   useEffect(() => {
     const getQuizzes = async () => {
@@ -72,6 +72,23 @@ function Dashboard () {
         alert(`Could not start the game\nError: ${response.status}`);
         throw new Error(response.status);
       }
+    } catch (error) {
+      throw new Error(error);
+    }
+    try {
+      const response = await fetch(url + `/admin/quiz/${quizId}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) {
+        alert(`Could not retrieve the session ID\nError: ${response.status}`);
+        throw new Error(response.status);
+      }
+      const data = await response.json();
+      setSessionId(data.active);
       setShowGameStart(true);
     } catch (error) {
       throw new Error(error);
@@ -79,6 +96,23 @@ function Dashboard () {
   }
 
   async function endGame (quizId) {
+    try {
+      const response = await fetch(url + `/admin/quiz/${quizId}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) {
+        alert(`Could not retrieve the session ID\nError: ${response.status}`);
+        throw new Error(response.status);
+      }
+      const data = await response.json();
+      setSessionId(data.active);
+    } catch (error) {
+      throw new Error(error);
+    }
     try {
       const response = await fetch(url + `/admin/quiz/${quizId}/end`, {
         method: 'POST',
@@ -95,17 +129,57 @@ function Dashboard () {
     } catch (error) {
       throw new Error(error);
     }
+    setSessionId('');
+  }
+
+  async function deleteGame (quizId) {
+    try {
+      const response = await fetch(url + `/admin/quiz/${quizId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (!response.ok) {
+        alert(response.status);
+        throw new Error('Error');
+      }
+    } catch (error) {
+      alert('This is error inside error catch');
+      throw new Error(`Error: ${error}`);
+    }
+    try {
+      const response = await fetch(url + '/admin/quiz', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) {
+        alert(response.status);
+        throw new Error('Error');
+      }
+      const data = await response.json();
+      setQuizzes(data.quizzes); // update state with fetched quizzes
+    } catch (error) {
+      alert('This is error inside error catch');
+      throw new Error(`Error: ${error}`);
+    }
   }
 
   const toggleGameStart = () => {
     setShowGameStart(!showGameStart);
+    setSessionId('');
   }
 
   const toggleGameEnd = () => {
     setShowGameEnd(!showGameEnd);
   }
 
-  const handleCopy = (link) => {
+  const handleCopy = (sid) => {
+    const link = `/playGame/${sid}`;
     navigator.clipboard.writeText(link);
     alert('Link copied to clipboard!');
   };
@@ -113,6 +187,7 @@ function Dashboard () {
   return (
     <div className="dashboard">
       <h1>Dashboard</h1>
+      < LogoutButton token={ token }/>
       <form onSubmit={addQuiz} className="container mt-5">
         <div className="form-group">
           <label htmlFor="quizTitleInput">Title of new Game: </label>
@@ -139,7 +214,8 @@ function Dashboard () {
             <img src={quiz.thumbnail} alt={quiz.name} className="img-fluid" />
           </div>
         </div>
-        <Modal isOpen={showGameStart} onRequestClose={toggleGameStart}>
+        <button onClick={() => deleteGame(quiz.id)} className="btn btn-danger">Delete</button>
+        <Modal isOpen={showGameStart} sessionId={sessionId}>
         <div className="modal-header">
           <h5 className="modal-title">Game Started</h5>
           <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={toggleGameStart}>
@@ -149,14 +225,13 @@ function Dashboard () {
         <div className="modal-body">
           <p>The game has started.</p>
           <p>Copy Link to the Game</p>
-          <button onClick={() => handleCopy(quiz.id)}>Copy Link</button>
+          <button onClick={() => handleCopy(sessionId)}>Copy Link</button>
         </div>
         <div className="modal-footer">
-          <button type="button" className="btn btn-primary">Save changes</button>
           <button type="button" className="btn btn-secondary" onClick={toggleGameStart}>Close</button>
         </div>
       </Modal>
-      <Modal isOpen={showGameEnd} onRequestClose={toggleGameEnd}>
+      <Modal isOpen={showGameEnd}>
         <div className="modal-header">
           <h5 className="modal-title">Game Ended</h5>
           <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={toggleGameEnd}>
@@ -166,10 +241,12 @@ function Dashboard () {
         <div className="modal-body">
           <p>The game has ended.</p>
           <p>Would you like to view the result?</p>
-          <Link>View Result</Link>
+          <Link to={{
+            pathname: `/gameResult/${token}/${sessionId}`
+          }}
+          >View Result</Link>
         </div>
         <div className="modal-footer">
-          <button type="button" className="btn btn-primary">Save changes</button>
           <button type="button" className="btn btn-secondary" onClick={toggleGameEnd}>Close</button>
         </div>
       </Modal>

@@ -1,16 +1,14 @@
 import { useParams, Link } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import fileToDataUrl from '../helper/helper'
 const url = 'http://localhost:5005';
 
 function EditGame () {
   const { token, quizId } = useParams();
-  const [game, setGame] = useState();
+  const [game, setGame] = useState([]);
   const [gameQuestions, setGameQuestions] = useState([]);
-  const [questionName, setQuestionName] = useState();
-  const [questionThumbnail, setQuestionThumbnail] = useState();
-  const [imageUrl, setImageUrl] = useState();
+  const [questionName, setQuestionName] = useState('');
+  const [questionThumbnail, setQuestionThumbnail] = useState('');
 
   useEffect(() => {
     const getGameData = async () => {
@@ -28,7 +26,7 @@ function EditGame () {
         const data = await response.json();
         setGame(data);
         setGameQuestions(data.questions);
-        setQuestionName(game.name);
+        setQuestionName(data.name);
       } catch (error) {
         throw new Error(`Error: ${error}`);
       }
@@ -36,14 +34,17 @@ function EditGame () {
     getGameData();
   }, [token, quizId]);
 
+  const goBackToDashBoard = () => {
+    window.location.href = `/dashboard/${token}`;
+  }
+
   const editGame = async (event) => {
     event.preventDefault();
     const dataUrl = await fileToDataUrl(questionThumbnail);
-    setImageUrl(dataUrl);
     const updatedGame = {
       ...game,
       name: questionName,
-      thumbnail: imageUrl
+      thumbnail: dataUrl
     };
     try {
       const response = await fetch(url + `/admin/quiz/${quizId}`, {
@@ -69,6 +70,7 @@ function EditGame () {
     return (
       <div>
         <h1>Edit your Game!</h1>
+        <button onClick={goBackToDashBoard}>Go Back to Dashboard</button>
         <form onSubmit={editGame} className='container mt-5'>
           <div className='form-group'>
             <label htmlFor='questionInput'>Name: </label>
