@@ -149,12 +149,12 @@ function CreateQuestion () {
         },
         body: JSON.stringify(updatedGame)
       });
-      alert(response.status);
       if (!response.ok) {
         alert(response.status);
         throw new Error(`Error ${response.status}`);
       }
       setQuestion(updatedGame);
+      window.location.href = `/editGame/${token}/${questionId}`;
     } catch (error) {
       alert(`Error: ${error}`);
       throw new Error(`Error: ${error}`);
@@ -162,6 +162,7 @@ function CreateQuestion () {
   }
 
   return (
+    <div>
     <form onSubmit={addQuiz} className='container mt-5'>
       <div className='form-group'>
         <label htmlFor='questionInput'>Question: </label>
@@ -234,10 +235,11 @@ function CreateQuestion () {
           <button onClick={() => deleteAnswer(index)}>Delete Answer</button>
         </div>
       ))}
-      <button onClick={addAnswer}>Add Answer</button>
       <br></br>
       <button type="submit" className="btn btn-primary">Add Question!</button>
     </form>
+    <button className="btn btn-primary" onClick={addAnswer} type='click'>Add Answer</button>
+    </div>
   )
 }
 

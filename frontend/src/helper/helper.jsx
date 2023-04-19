@@ -16,8 +16,8 @@ export default function fileToDataUrl (file) {
   return dataUrlPromise;
 }
 
-export default async function createID (questionId) {
-  let id = Math.floor(100000 + Math.random() * 900000);
+export async function createID (questionId, token) {
+  const id = Math.floor(100000 + Math.random() * 900000);
   try {
     const response = await fetch(url + `/admin/quiz/${questionId}`, {
       method: 'GET',
@@ -31,10 +31,10 @@ export default async function createID (questionId) {
       throw new Error(`Error ${response.status}`);
     }
     const data = await response.json();
-    let questions = data.questions;
+    const questions = data.questions;
     questions.forEach(q => {
       if (q.id === id) {
-        createID(questionId)
+        createID(questionId, token)
       }
     })
     return id;
