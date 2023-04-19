@@ -28,7 +28,7 @@ function Register () {
       });
       if (response.ok) {
         const data = await response.json();
-        alert(`Successful Token:${data.token}`);
+        window.location.href = `/dashboard/${data.token}`;
       } else {
         alert(response.status);
         throw new Error('Error');
@@ -39,45 +39,49 @@ function Register () {
     }
   };
   return (
-    <form onSubmit={handleSubmit}>
-      <label>
-        Email:
-        <input
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-        />
-      </label>
-      <br />
-      <label>
-        Name:
-        <input
-          type="text"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-        />
-      </label>
-      <br />
-      <label>
-        Password:
-        <input
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-        />
-      </label>
-      <br />
-      <label>
-        Confirm Password:
-        <input
-          type="password"
-          value={confirmPassword}
-          onChange={(event) => setConfirmPassword(event.target.value)}
-        />
-      </label>
-      <br />
-      <button type="submit">Submit</button>
-    </form>
+    <form onSubmit={handleSubmit} className="container">
+  <div className="form-group">
+    <label htmlFor="email">Email:</label>
+    <input
+      type="email"
+      className="form-control"
+      id="email"
+      value={email}
+      onChange={(event) => setEmail(event.target.value)}
+    />
+  </div>
+  <div className="form-group">
+    <label htmlFor="name">Name:</label>
+    <input
+      type="text"
+      className="form-control"
+      id="name"
+      value={name}
+      onChange={(event) => setName(event.target.value)}
+    />
+  </div>
+  <div className="form-group">
+    <label htmlFor="password">Password:</label>
+    <input
+      type="password"
+      className="form-control"
+      id="password"
+      value={password}
+      onChange={(event) => setPassword(event.target.value)}
+    />
+  </div>
+  <div className="form-group">
+    <label htmlFor="confirmPassword">Confirm Password:</label>
+    <input
+      type="password"
+      className="form-control"
+      id="confirmPassword"
+      value={confirmPassword}
+      onChange={(event) => setConfirmPassword(event.target.value)}
+    />
+  </div>
+  <button type="submit" className="btn btn-primary">Submit</button>
+</form>
   );
 }
 

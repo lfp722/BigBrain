@@ -8,11 +8,14 @@ import EditQuestion from './pages/EditQuestion';
 import CreateQuestion from './pages/CreateQuestion';
 import Debug from './pages/Debug';
 import GameResult from './pages/GameResult';
+import Home from './pages/Home';
+import ErrorPage from './pages/ErrorPage';
 
 function App () {
   return (
     <Router>
       <Routes>
+        <Route exact path='/' element={ <Home /> } />
         <Route exact path="/login" element={ <Login /> } />
         <Route exact path="/register" element={ <Register />} />
         <Route exact path='/dashboard/:token' element={ <Dashboard />} />
@@ -21,6 +24,7 @@ function App () {
         <Route exact path='/editQuestion/:token/:questionId/:quizId' element={ <EditQuestion />} />
         <Route exact path='/debug' element={ <Debug />} />
         <Route exact path='/gameResult/:token/:sessionId' element={ <GameResult />} />
+        <Route path='*' element={ <ErrorPage />} />
       </Routes>
     </Router>
   );
